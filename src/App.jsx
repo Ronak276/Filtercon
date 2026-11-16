@@ -34,6 +34,8 @@ export default function App() {
   // Tab navigation
   const [activeTab, setActiveTab] = useState('home');
   const [bookingSchedule, setBookingSchedule] = useState(null);
+  const [estimateProduct, setEstimateProduct] = useState(null); // Active product for free estimate
+  const [latestEstimateBooking, setLatestEstimateBooking] = useState(null); // Saved estimate booking record
 
   // E-Commerce state - Initially completely empty
   const [cartItems, setCartItems] = useState([]);
@@ -163,10 +165,44 @@ export default function App() {
               <ScheduleSlotScreen
                 totalAmount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
                 selectedLocation={selectedLocation}
-                onBack={() => setActiveTab('cart')}
+                isEstimateMode={Boolean(estimateProduct)}
+                estimateProduct={estimateProduct}
+                onBack={() => {
+                  if (estimateProduct) {
+                    setActiveTab('home');
+                    setEstimateProduct(null);
+                  } else {
+                    setActiveTab('cart');
+                  }
+                }}
                 onConfirmBooking={(bookingData) => {
                   setBookingSchedule(bookingData);
-                  setActiveTab('payment');
+                  if (estimateProduct) {
+                    // Create Free Estimate Booking directly without Stripe payment
+                    const newBooking = {
+                      id: 'EST-' + Math.floor(10000 + Math.random() * 90000),
+                      title: `Free In-Home Estimate: ${estimateProduct.name}`,
+                      category: 'Free On-Site Estimate',
+                      date: `${bookingData.day.day}, ${bookingData.day.date}, 2026`,
+                      timeSlot: bookingData.slot.time,
+                      technician: {
+                        name: 'David Miller',
+                        role: 'Master Plumber • Filtercon Specialist',
+                        rating: '4.98',
+                        phone: '+1 (800) 244-5999',
+                        verified: true
+                      },
+                      address: `${bookingData.note ? bookingData.note + ', ' : ''}${selectedLocation}`,
+                      amount: '$0 (100% Free)',
+                      status: 'Technician Dispatched',
+                      statusColor: 'text-[#0284C7] bg-sky-50 border-sky-200'
+                    };
+                    setLatestEstimateBooking(newBooking);
+                    setEstimateProduct(null);
+                    setActiveTab('bookings');
+                  } else {
+                    setActiveTab('payment');
+                  }
                 }}
               />
             )}
@@ -200,6 +236,9 @@ export default function App() {
                 onBack={() => setActiveTab('home')}
                 onOpenNotifications={() => setActiveTab('notifications')}
                 onOpenBookings={() => setActiveTab('bookings')}
+                onUpdateUser={(updated) => setCurrentUser(updated)}
+                selectedLocation={selectedLocation}
+                onUpdateLocation={(newLoc) => setSelectedLocation(newLoc)}
               />
             )}
 
@@ -207,6 +246,7 @@ export default function App() {
               <MyBookingsScreen
                 onBack={() => setActiveTab('account')}
                 onBookNew={() => setActiveTab('categories')}
+                newEstimateBooking={latestEstimateBooking}
               />
             )}
 
@@ -250,6 +290,11 @@ export default function App() {
         <ProductDetailModal
           product={selectedProduct}
           onClose={() => setSelectedProductId(null)}
+          onOpenConsultation={(prod) => {
+            setSelectedProductId(null);
+            setEstimateProduct(prod);
+            setActiveTab('schedule');
+          }}
           onAddToCart={(prod, qty) => {
             handleAddToCart(prod, qty);
             setSelectedProductId(null);

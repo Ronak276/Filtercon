@@ -58,7 +58,7 @@ export default function ProductDetailModal({ product, onClose, onOpenConsultatio
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-5 pb-24">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-5 pb-3">
           {/* Main Media Showcase */}
           <div className="relative rounded-3xl overflow-hidden bg-slate-50 border border-slate-100 mb-3.5 aspect-[4/3] group shadow-inner">
             <img
@@ -184,8 +184,9 @@ export default function ProductDetailModal({ product, onClose, onOpenConsultatio
           </a>
           <button
             onClick={() => {
-              onClose();
-              if (onOpenConsultation) onOpenConsultation();
+              if (onOpenConsultation) {
+                onOpenConsultation(product);
+              }
             }}
             className="flex-1 py-3 px-3 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-all truncate"
           >

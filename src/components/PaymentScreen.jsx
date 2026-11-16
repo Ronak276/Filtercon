@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, CreditCard, ShieldCheck, Lock, 
   CheckCircle2, Sparkles, AlertCircle, Building2, 
-  Smartphone, ArrowRight, Shield, Award, Landmark, Building
+  Smartphone, ArrowRight, Shield, Award, Landmark, Building,
+  Eye, EyeOff, Trash2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
@@ -14,11 +15,12 @@ export default function PaymentScreen({
   onBack, 
   onPaymentSuccess 
 }) {
-  // Saved Cards (Last used / previous checkout cards)
-  const savedCards = [
+  // Saved Cards state
+  const [savedCardsList, setSavedCardsList] = useState([
     {
       id: 'saved-1',
       brand: 'Visa',
+      fullNumber: '4242 • 8821 • 7390 • 4242',
       last4: '4242',
       expiry: '12/28',
       holder: 'Ronak Patel',
@@ -28,16 +30,18 @@ export default function PaymentScreen({
     {
       id: 'saved-2',
       brand: 'Mastercard',
+      fullNumber: '5412 • 7512 • 3412 • 8819',
       last4: '8819',
       expiry: '09/27',
       holder: 'Ronak Patel',
       isDefault: false,
       label: 'Home Office Card'
     }
-  ];
+  ]);
 
   const [activeCardTab, setActiveCardTab] = useState('saved'); // 'saved' | 'new'
   const [selectedSavedCardId, setSelectedSavedCardId] = useState('saved-1');
+  const [showCardNumber, setShowCardNumber] = useState(false); // Eye toggle
   const [saveCardForFuture, setSaveCardForFuture] = useState(true);
   const [selectedMethod, setSelectedMethod] = useState('card');
   const [selectedBank, setSelectedBank] = useState('chase');
@@ -49,14 +53,40 @@ export default function PaymentScreen({
   const [newCvc, setNewCvc] = useState('');
   const [newNameOnCard, setNewNameOnCard] = useState('Ronak Patel');
 
+  // Delete Card Handler
+  const handleDeleteCard = (e, cardId) => {
+    e.stopPropagation();
+    const filtered = savedCardsList.filter((c) => c.id !== cardId);
+    setSavedCardsList(filtered);
+    if (selectedSavedCardId === cardId && filtered.length > 0) {
+      setSelectedSavedCardId(filtered[0].id);
+    } else if (filtered.length === 0) {
+      setActiveCardTab('new');
+    }
+  };
+
   // Currently active card details for display & processing
-  const currentSavedCard = savedCards.find((c) => c.id === selectedSavedCardId) || savedCards[0];
-  const displayedCardNumber = activeCardTab === 'saved' 
-    ? `•••• •••• •••• ${currentSavedCard.last4}` 
-    : (newCardNumber || '•••• •••• •••• 4242');
-  const displayedExpiry = activeCardTab === 'saved' ? currentSavedCard.expiry : (newExpiry || '12/28');
-  const displayedHolder = activeCardTab === 'saved' ? currentSavedCard.holder : (newNameOnCard || 'Ronak Patel');
-  const displayedBrand = activeCardTab === 'saved' ? currentSavedCard.brand : 'Visa';
+  const currentSavedCard = savedCardsList.find((c) => c.id === selectedSavedCardId) || savedCardsList[0];
+  
+  const getMaskedOrVisibleNumber = () => {
+    if (activeCardTab === 'saved') {
+      if (!currentSavedCard) return '•••• •••• •••• 4242';
+      return showCardNumber ? currentSavedCard.fullNumber : `•••• •••• •••• ${currentSavedCard.last4}`;
+    }
+    // New card
+    if (!newCardNumber) return showCardNumber ? '4242 8821 7390 4242' : '•••• •••• •••• 4242';
+    if (showCardNumber) return newCardNumber;
+    // Mask all but last 4
+    const clean = newCardNumber.replace(/\s+/g, '');
+    if (clean.length <= 4) return clean;
+    const last4 = clean.slice(-4);
+    return `•••• •••• •••• ${last4}`;
+  };
+
+  const displayedCardNumber = getMaskedOrVisibleNumber();
+  const displayedExpiry = activeCardTab === 'saved' ? (currentSavedCard?.expiry || '12/28') : (newExpiry || '12/28');
+  const displayedHolder = activeCardTab === 'saved' ? (currentSavedCard?.holder || 'Ronak Patel') : (newNameOnCard || 'Ronak Patel');
+  const displayedBrand = activeCardTab === 'saved' ? (currentSavedCard?.brand || 'Visa') : 'Visa';
 
   const [paymentState, setPaymentState] = useState('idle'); // 'idle' | 'processing' | 'coin-animation' | 'success'
 
@@ -85,9 +115,9 @@ export default function PaymentScreen({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-6 overflow-y-auto no-scrollbar font-sans select-none relative">
+    <div className="flex-1 flex flex-col bg-[#F8FAFC] font-sans select-none relative h-full overflow-hidden">
       {/* Top Header */}
-      <div className="px-5 pt-12 pb-3.5 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-20">
+      <div className="flex-shrink-0 px-5 pt-12 pb-3.5 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-2.5">
           <button
             onClick={onBack}
@@ -108,8 +138,9 @@ export default function PaymentScreen({
       </div>
 
       {paymentState !== 'coin-animation' && paymentState !== 'success' ? (
-        <div className="p-4 space-y-4 flex-1 flex flex-col justify-between">
-          <div className="space-y-4">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Scrollable Content Body */}
+          <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
             {/* Amount Summary Card */}
             <div className="p-4 rounded-3xl bg-white border border-sky-100 shadow-sm flex items-center justify-between">
               <div>
@@ -188,11 +219,30 @@ export default function PaymentScreen({
                     </div>
                   </div>
 
-                  <div className="mb-4 relative z-10">
-                    <span className="text-[9.5px] text-slate-400 font-mono tracking-widest uppercase block mb-0.5">Card Number</span>
-                    <span className="text-base font-black font-mono tracking-widest text-[#0F172A]">
-                      {displayedCardNumber}
-                    </span>
+                  <div className="mb-4 relative z-10 flex items-center justify-between">
+                    <div>
+                      <span className="text-[9.5px] text-slate-400 font-mono tracking-widest uppercase block mb-0.5">Card Number</span>
+                      <span className="text-base font-black font-mono tracking-widest text-[#0F172A]">
+                        {displayedCardNumber}
+                      </span>
+                    </div>
+
+                    {/* Eye toggle button for viewing card number */}
+                    <button
+                      type="button"
+                      onClick={() => setShowCardNumber(!showCardNumber)}
+                      className="p-1.5 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-500 hover:text-[#0284C7] transition-all cursor-pointer flex items-center gap-1 active:scale-95 border border-slate-200/60"
+                      title={showCardNumber ? "Hide full card number" : "Show full card number"}
+                    >
+                      {showCardNumber ? (
+                        <EyeOff className="w-3.5 h-3.5 text-[#0284C7]" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5" />
+                      )}
+                      <span className="text-[10px] font-bold">
+                        {showCardNumber ? 'Hide' : 'View'}
+                      </span>
+                    </button>
                   </div>
 
                   <div className="flex justify-between items-end text-xs relative z-10">
@@ -246,7 +296,7 @@ export default function PaymentScreen({
                     </div>
 
                     <div className="space-y-2">
-                      {savedCards.map((card) => {
+                      {savedCardsList.map((card) => {
                         const isSelected = selectedSavedCardId === card.id;
                         return (
                           <div
@@ -281,10 +331,23 @@ export default function PaymentScreen({
                               </div>
                             </div>
 
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                              isSelected ? 'border-[#0284C7] bg-[#0284C7]' : 'border-slate-300'
-                            }`}>
-                              {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                            <div className="flex items-center gap-2.5">
+                              {/* Delete Card Button */}
+                              <button
+                                type="button"
+                                onClick={(e) => handleDeleteCard(e, card.id)}
+                                className="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-500 flex items-center justify-center transition-all cursor-pointer active:scale-90 border border-rose-100"
+                                title="Delete saved card"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+
+                              {/* Radio Selection Indicator */}
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                isSelected ? 'border-[#0284C7] bg-[#0284C7]' : 'border-slate-300'
+                              }`}>
+                                {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                              </div>
                             </div>
                           </div>
                         );
@@ -513,19 +576,19 @@ export default function PaymentScreen({
             )}
 
             {/* Trust badge */}
-            <div className="flex items-center justify-center gap-1.5 text-[10.5px] text-slate-400 font-medium">
+            <div className="flex items-center justify-center gap-1.5 text-[10.5px] text-slate-400 font-medium pb-2">
               <ShieldCheck className="w-3.5 h-3.5 text-[#16A34A]" />
               <span>Certified Level 1 PCI-DSS Security Compliance</span>
             </div>
           </div>
 
-          {/* Pay Button */}
-          <div className="pt-2">
+          {/* Docked Sticky Bottom Pay Button (Always 100% visible, perfectly aligned, zero cutoff) */}
+          <div className="flex-shrink-0 p-4 bg-white/95 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.03)] z-20">
             <Button
               size="lg"
               onClick={handlePayNow}
               disabled={paymentState === 'processing'}
-              className="w-full text-sm font-black py-3 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] shadow-lg shadow-sky-900/20 active:scale-95 transition-all cursor-pointer"
+              className="w-full text-sm font-black py-3.5 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] shadow-lg shadow-sky-900/20 active:scale-95 transition-all cursor-pointer"
             >
               {paymentState === 'processing' ? (
                 <div className="flex items-center justify-center gap-2">

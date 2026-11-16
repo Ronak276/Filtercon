@@ -158,7 +158,7 @@ export default function HomeScreen({
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 32, stiffness: 140, mass: 1.1 }}
       onScroll={handleScroll}
-      className="flex-1 flex flex-col bg-white pb-28 overflow-y-auto no-scrollbar font-sans relative"
+      className="flex-1 flex flex-col bg-white pb-3 overflow-y-auto no-scrollbar font-sans relative"
     >
       {/* REAL APP TOP HEADER: Starts transparent on hero, turns Pure White with border ONLY when scrolled */}
       <header 
@@ -564,7 +564,7 @@ export default function HomeScreen({
       </div>
 
       {/* 5. UNIFIED CLEAN IN-HOME TEST & QUIZ SECTION (Pure Light Filtercon Theme) */}
-      <div className="px-5 mb-4">
+      <div className="px-5 mb-1">
         <div className="p-4 rounded-3xl bg-white text-[#0F172A] shadow-sm border border-sky-100">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold text-[#0284C7] bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
