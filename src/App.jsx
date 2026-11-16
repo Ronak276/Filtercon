@@ -119,108 +119,111 @@ export default function App() {
         onSelectLocality={(loc) => setSelectedLocation(loc)}
       />
 
-      {/* 5. Main Screens with Bottom Nav */}
+      {/* 5. Main Screens with Fixed Bottom Nav */}
       {!showSplash && !showOnboarding && (
-        <div className="flex-1 flex flex-col h-full relative">
-          {activeTab === 'home' && (
-            <HomeScreen
-              onSelectProduct={(id) => setSelectedProductId(id)}
-              onAddToCart={handleAddToCart}
-              onUpdateQty={handleUpdateQty}
-              cartItems={cartItems}
-              onOpenDiagnostic={() => setActiveTab('diagnostic')}
-              onOpenCategories={() => setActiveTab('categories')}
-              onOpenLocation={() => setShowLocationDrawer(true)}
-              onOpenAccount={() => setActiveTab('account')}
-              onOpenNotifications={() => setActiveTab('notifications')}
-              currentUser={currentUser}
-              selectedLocation={selectedLocation}
-              cartCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
-            />
-          )}
+        <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+          {/* Scrollable Content Viewport */}
+          <div className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col">
+            {activeTab === 'home' && (
+              <HomeScreen
+                onSelectProduct={(id) => setSelectedProductId(id)}
+                onAddToCart={handleAddToCart}
+                onUpdateQty={handleUpdateQty}
+                cartItems={cartItems}
+                onOpenDiagnostic={() => setActiveTab('diagnostic')}
+                onOpenCategories={() => setActiveTab('categories')}
+                onOpenLocation={() => setShowLocationDrawer(true)}
+                onOpenAccount={() => setActiveTab('account')}
+                onOpenNotifications={() => setActiveTab('notifications')}
+                currentUser={currentUser}
+                selectedLocation={selectedLocation}
+                cartCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
+              />
+            )}
 
-          {activeTab === 'categories' && (
-            <CategoriesScreen
-              onSelectProduct={(id) => setSelectedProductId(id)}
-              onAddToCart={handleAddToCart}
-            />
-          )}
+            {activeTab === 'categories' && (
+              <CategoriesScreen
+                onSelectProduct={(id) => setSelectedProductId(id)}
+                onAddToCart={handleAddToCart}
+              />
+            )}
 
-          {activeTab === 'cart' && (
-            <CartModal
-              items={cartItems}
-              onUpdateQty={handleUpdateQty}
-              onRemove={handleRemoveItem}
-              onClear={handleClearCart}
-              onExplore={() => setActiveTab('categories')}
-              onProceedToSchedule={() => setActiveTab('schedule')}
-            />
-          )}
+            {activeTab === 'cart' && (
+              <CartModal
+                items={cartItems}
+                onUpdateQty={handleUpdateQty}
+                onRemove={handleRemoveItem}
+                onClear={handleClearCart}
+                onExplore={() => setActiveTab('categories')}
+                onProceedToSchedule={() => setActiveTab('schedule')}
+              />
+            )}
 
-          {activeTab === 'schedule' && (
-            <ScheduleSlotScreen
-              totalAmount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
-              selectedLocation={selectedLocation}
-              onBack={() => setActiveTab('cart')}
-              onConfirmBooking={(bookingData) => {
-                setBookingSchedule(bookingData);
-                setActiveTab('payment');
-              }}
-            />
-          )}
+            {activeTab === 'schedule' && (
+              <ScheduleSlotScreen
+                totalAmount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+                selectedLocation={selectedLocation}
+                onBack={() => setActiveTab('cart')}
+                onConfirmBooking={(bookingData) => {
+                  setBookingSchedule(bookingData);
+                  setActiveTab('payment');
+                }}
+              />
+            )}
 
-          {activeTab === 'payment' && (
-            <PaymentScreen
-              amount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
-              bookingInfo={bookingSchedule}
-              onBack={() => setActiveTab('bookings')}
-              onPaymentSuccess={(paymentData) => {
-                handleClearCart();
-                setTimeout(() => {
-                  setActiveTab('bookings');
-                }, 2200);
-              }}
-            />
-          )}
+            {activeTab === 'payment' && (
+              <PaymentScreen
+                amount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+                bookingInfo={bookingSchedule}
+                onBack={() => setActiveTab('bookings')}
+                onPaymentSuccess={(paymentData) => {
+                  handleClearCart();
+                  setTimeout(() => {
+                    setActiveTab('bookings');
+                  }, 2200);
+                }}
+              />
+            )}
 
-          {activeTab === 'diagnostic' && (
-            <DiagnosticScreen
-              onSelectProduct={(id) => setSelectedProductId(id)}
-              onBack={() => setActiveTab('home')}
-            />
-          )}
+            {activeTab === 'diagnostic' && (
+              <DiagnosticScreen
+                onSelectProduct={(id) => setSelectedProductId(id)}
+                onBack={() => setActiveTab('home')}
+              />
+            )}
 
-          {activeTab === 'account' && (
-            <AccountScreen
-              user={currentUser}
-              onLogout={() => setCurrentUser(null)}
-              onOpenAuth={() => setShowAuthModal(true)}
-              onBack={() => setActiveTab('home')}
-              onOpenNotifications={() => setActiveTab('notifications')}
-              onOpenBookings={() => setActiveTab('bookings')}
-            />
-          )}
+            {activeTab === 'account' && (
+              <AccountScreen
+                user={currentUser}
+                onLogout={() => setCurrentUser(null)}
+                onOpenAuth={() => setShowAuthModal(true)}
+                onBack={() => setActiveTab('home')}
+                onOpenNotifications={() => setActiveTab('notifications')}
+                onOpenBookings={() => setActiveTab('bookings')}
+              />
+            )}
 
-          {activeTab === 'bookings' && (
-            <MyBookingsScreen
-              onBack={() => setActiveTab('account')}
-              onBookNew={() => setActiveTab('categories')}
-            />
-          )}
+            {activeTab === 'bookings' && (
+              <MyBookingsScreen
+                onBack={() => setActiveTab('account')}
+                onBookNew={() => setActiveTab('categories')}
+              />
+            )}
 
-          {activeTab === 'notifications' && (
-            <NotificationScreen
-              onBack={() => setActiveTab('home')}
-              onOpenTab={(tab) => setActiveTab(tab)}
-            />
-          )}
+            {activeTab === 'notifications' && (
+              <NotificationScreen
+                onBack={() => setActiveTab('home')}
+                onOpenTab={(tab) => setActiveTab(tab)}
+              />
+            )}
+          </div>
 
-          {/* Real App Booking Bottom Dock: Floating Modern Rounded Tab Bar Dock */}
+          {/* REAL MOBILE FIXED BOTTOM DOCK (Never scrolls, stays pinned above Android navigation bar) */}
           {activeTab !== 'diagnostic' && activeTab !== 'notifications' && activeTab !== 'schedule' && activeTab !== 'payment' && activeTab !== 'bookings' && (
-            <div className="flex-shrink-0 z-30 px-4 pb-3 pt-1 pointer-events-none">
+            <div className="flex-shrink-0 z-30 px-3 pb-3 pt-1 bg-white/80 backdrop-blur-md border-t border-slate-100">
               <AnimatePresence>
                 {cartItems.length > 0 && activeTab !== 'cart' && (
-                  <div className="pointer-events-auto mb-2">
+                  <div className="mb-2">
                     <FloatingCartBar
                       items={cartItems}
                       onGoToCart={() => setActiveTab('cart')}
@@ -230,7 +233,7 @@ export default function App() {
               </AnimatePresence>
 
               {/* Floating Modern Rounded Bottom Navigation Bar */}
-              <div className="pointer-events-auto w-full max-w-[390px] mx-auto">
+              <div className="w-full max-w-[390px] mx-auto">
                 <BottomNav
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
