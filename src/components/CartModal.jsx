@@ -8,7 +8,14 @@ import confetti from 'canvas-confetti';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 
-export default function CartModal({ items, onUpdateQty, onRemove, onClear, onExplore }) {
+export default function CartModal({ 
+  items, 
+  onUpdateQty, 
+  onRemove, 
+  onClear, 
+  onExplore,
+  onProceedToSchedule
+}) {
   const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -32,7 +39,7 @@ export default function CartModal({ items, onUpdateQty, onRemove, onClear, onExp
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-16">
+    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-16 overflow-y-auto no-scrollbar">
       {/* Top Header with Safe Top Padding */}
       <div className="px-5 pt-12 pb-3 bg-white border-b border-slate-100 flex items-center justify-between">
         <div>
@@ -197,15 +204,15 @@ export default function CartModal({ items, onUpdateQty, onRemove, onClear, onExp
             <span>256-Bit Encrypted • 30-Day Money-Back Guarantee</span>
           </div>
 
-          {/* Checkout Button */}
+          {/* Proceed to Schedule Button (Selecting Date & Slot before completing order) */}
           <Button
             size="lg"
-            onClick={handleCheckout}
+            onClick={onProceedToSchedule || handleCheckout}
             disabled={isProcessing}
-            className="w-full text-sm font-bold shadow-lg shadow-sky-950/20"
+            className="w-full text-sm font-black py-3 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] shadow-lg shadow-sky-900/20 active:scale-95 transition-all cursor-pointer"
           >
             <CreditCard className="w-4 h-4 mr-2" />
-            <span>{isProcessing ? 'Securing Order...' : `Complete Order • $${total}`}</span>
+            <span>Proceed to Schedule Slot • ${total}</span>
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

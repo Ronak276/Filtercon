@@ -25,7 +25,7 @@ export default function CategoriesScreen({ onSelectProduct, onAddToCart }) {
   });
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-16">
+    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-16 overflow-y-auto no-scrollbar">
       {/* Top Header with Safe Top Padding to prevent Dynamic Island overlap */}
       <div className="px-5 pt-12 pb-3 bg-white border-b border-slate-100 flex items-center justify-between">
         <div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import MobileWrapper from './components/MobileWrapper';
 import SplashScreen from './components/SplashScreen';
 import OnboardingScreen from './components/OnboardingScreen';
@@ -7,10 +8,15 @@ import HomeScreen from './components/HomeScreen';
 import CategoriesScreen from './components/CategoriesScreen';
 import DiagnosticScreen from './components/DiagnosticScreen';
 import AccountScreen from './components/AccountScreen';
+import NotificationScreen from './components/NotificationScreen';
+import MyBookingsScreen from './components/MyBookingsScreen';
+import ScheduleSlotScreen from './components/ScheduleSlotScreen';
+import PaymentScreen from './components/PaymentScreen';
 import CartModal from './components/CartModal';
 import ProductDetailModal from './components/ProductDetailModal';
 import LocationDrawer from './components/LocationDrawer';
 import BottomNav from './components/BottomNav';
+import FloatingCartBar from './components/FloatingCartBar';
 import { PRODUCTS } from './data/products';
 
 export default function App() {
@@ -27,11 +33,10 @@ export default function App() {
 
   // Tab navigation
   const [activeTab, setActiveTab] = useState('home');
+  const [bookingSchedule, setBookingSchedule] = useState(null);
 
-  // E-Commerce state
-  const [cartItems, setCartItems] = useState([
-    { ...PRODUCTS[2], quantity: 1 },
-  ]);
+  // E-Commerce state - Initially completely empty
+  const [cartItems, setCartItems] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
 
   // Handle Cart Operations
@@ -80,7 +85,12 @@ export default function App() {
 
       {/* 2. Onboarding Flow */}
       {!showSplash && showOnboarding && (
-        <OnboardingScreen onComplete={() => setShowOnboarding(false)} />
+        <OnboardingScreen 
+          onComplete={() => setShowOnboarding(false)} 
+          onOpenAuth={() => {
+            setShowAuthModal(true);
+          }}
+        />
       )}
 
       {/* 3. Auth Modal */}
@@ -89,9 +99,15 @@ export default function App() {
           onLogin={(userData) => {
             setCurrentUser(userData);
             setShowAuthModal(false);
+            setShowOnboarding(false);
           }}
-          onGuest={() => setShowAuthModal(false)}
-          onClose={() => setShowAuthModal(false)}
+          onGuest={() => {
+            setShowAuthModal(false);
+            setShowOnboarding(false);
+          }}
+          onClose={() => {
+            setShowAuthModal(false);
+          }}
         />
       )}
 
@@ -110,9 +126,14 @@ export default function App() {
             <HomeScreen
               onSelectProduct={(id) => setSelectedProductId(id)}
               onAddToCart={handleAddToCart}
+              onUpdateQty={handleUpdateQty}
+              cartItems={cartItems}
               onOpenDiagnostic={() => setActiveTab('diagnostic')}
               onOpenCategories={() => setActiveTab('categories')}
               onOpenLocation={() => setShowLocationDrawer(true)}
+              onOpenAccount={() => setActiveTab('account')}
+              onOpenNotifications={() => setActiveTab('notifications')}
+              currentUser={currentUser}
               selectedLocation={selectedLocation}
               cartCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
             />
@@ -132,12 +153,40 @@ export default function App() {
               onRemove={handleRemoveItem}
               onClear={handleClearCart}
               onExplore={() => setActiveTab('categories')}
+              onProceedToSchedule={() => setActiveTab('schedule')}
+            />
+          )}
+
+          {activeTab === 'schedule' && (
+            <ScheduleSlotScreen
+              totalAmount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+              selectedLocation={selectedLocation}
+              onBack={() => setActiveTab('cart')}
+              onConfirmBooking={(bookingData) => {
+                setBookingSchedule(bookingData);
+                setActiveTab('payment');
+              }}
+            />
+          )}
+
+          {activeTab === 'payment' && (
+            <PaymentScreen
+              amount={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+              bookingInfo={bookingSchedule}
+              onBack={() => setActiveTab('bookings')}
+              onPaymentSuccess={(paymentData) => {
+                handleClearCart();
+                setTimeout(() => {
+                  setActiveTab('bookings');
+                }, 2200);
+              }}
             />
           )}
 
           {activeTab === 'diagnostic' && (
             <DiagnosticScreen
               onSelectProduct={(id) => setSelectedProductId(id)}
+              onBack={() => setActiveTab('home')}
             />
           )}
 
@@ -146,15 +195,50 @@ export default function App() {
               user={currentUser}
               onLogout={() => setCurrentUser(null)}
               onOpenAuth={() => setShowAuthModal(true)}
+              onBack={() => setActiveTab('home')}
+              onOpenNotifications={() => setActiveTab('notifications')}
+              onOpenBookings={() => setActiveTab('bookings')}
             />
           )}
 
-          {/* Bottom Navigation */}
-          <BottomNav
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            cartCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
-          />
+          {activeTab === 'bookings' && (
+            <MyBookingsScreen
+              onBack={() => setActiveTab('account')}
+              onBookNew={() => setActiveTab('categories')}
+            />
+          )}
+
+          {activeTab === 'notifications' && (
+            <NotificationScreen
+              onBack={() => setActiveTab('home')}
+              onOpenTab={(tab) => setActiveTab(tab)}
+            />
+          )}
+
+          {/* Real App Booking Bottom Dock: Floating Modern Rounded Tab Bar Dock */}
+          {activeTab !== 'diagnostic' && activeTab !== 'notifications' && activeTab !== 'schedule' && activeTab !== 'payment' && activeTab !== 'bookings' && (
+            <div className="flex-shrink-0 z-30 px-3.5 pb-4 pt-1 pointer-events-none">
+              <AnimatePresence>
+                {cartItems.length > 0 && activeTab !== 'cart' && (
+                  <div className="pointer-events-auto mb-2">
+                    <FloatingCartBar
+                      items={cartItems}
+                      onGoToCart={() => setActiveTab('cart')}
+                    />
+                  </div>
+                )}
+              </AnimatePresence>
+
+              {/* Floating Modern Rounded Bottom Navigation Bar */}
+              <div className="pointer-events-auto">
+                <BottomNav
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  cartCount={cartItems.reduce((acc, it) => acc + it.quantity, 0)}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -4,20 +4,37 @@ import {
   MapPin, Bell, Search, Sparkles, ShieldCheck, 
   Droplets, ArrowRight, Star, CheckCircle2,
   Calendar, Layers, Zap, Gift, Share2, Clock, Check,
-  Phone, Heart, Award, Wrench, Droplet, Users, ChevronRight, CheckCircle
+  Phone, Heart, Award, Wrench, Droplet, Users, ChevronRight, CheckCircle,
+  Leaf, Shield, Plus, Minus
 } from 'lucide-react';
 import { PRODUCTS, CATEGORIES } from '../data/products';
 import { Badge } from './ui/badge';
 
 export default function HomeScreen({ 
   onSelectProduct, 
+  onAddToCart,
+  onUpdateQty,
+  cartItems = [],
   onOpenDiagnostic, 
   onOpenCategories, 
   onOpenLocation,
+  onOpenAccount,
+  onOpenNotifications,
+  currentUser,
   selectedLocation = 'San Diego (Downtown)'
 }) {
   // Hero Carousel State: Auto-switches every 3 seconds
   const [heroIndex, setHeroIndex] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleScroll = (e) => {
+    const top = e.currentTarget.scrollTop;
+    if (top > 40) {
+      if (!isScrolled) setIsScrolled(true);
+    } else {
+      if (isScrolled) setIsScrolled(false);
+    }
+  };
 
   const heroSlides = [
     {
@@ -106,25 +123,29 @@ export default function HomeScreen({
     }
   ];
 
-  // Benefits to Family & Home from website
+  // Benefits to Family & Home from website (Using clean React Lucide Icons instead of emojis)
   const familyBenefits = [
     {
-      emoji: '✨',
+      icon: Sparkles,
+      iconColor: 'text-amber-500 bg-amber-50',
       title: 'Silky Hair & Soft Skin',
       desc: 'Eliminates 99% free chlorine in shower steam that causes dry itchy skin, eczema & brittle hair.'
     },
     {
-      emoji: '🛡️',
+      icon: Shield,
+      iconColor: 'text-[#0284C7] bg-sky-50',
       title: 'Protects Plumbing & Water Heaters',
       desc: 'Prevents damaging mineral scale buildup inside tankless heaters, dishwashers, and copper pipes.'
     },
     {
-      emoji: '🚰',
+      icon: Droplets,
+      iconColor: 'text-cyan-600 bg-cyan-50',
       title: 'Drinking Water at Every Tap',
       desc: 'Enjoy crisp, pure, chemical-free mountain-spring water from every faucet in your house.'
     },
     {
-      emoji: '🌿',
+      icon: Leaf,
+      iconColor: 'text-emerald-600 bg-emerald-50',
       title: '100% Eco-Friendly & Garden Safe',
       desc: 'No salt discharge. Backwash water is completely safe for your lawn, trees, and California plants.'
     }
@@ -132,12 +153,95 @@ export default function HomeScreen({
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="flex-1 flex flex-col bg-white pb-6 overflow-y-auto no-scrollbar font-sans"
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', damping: 32, stiffness: 140, mass: 1.1 }}
+      onScroll={handleScroll}
+      className="flex-1 flex flex-col bg-white pb-6 overflow-y-auto no-scrollbar font-sans relative"
     >
-      {/* 1. HERO SECTION WITH 3-SECOND AUTO CAROUSEL */}
-      <div className="relative w-full h-[330px] rounded-b-[40px] overflow-hidden shadow-md flex-shrink-0">
+      {/* REAL APP TOP HEADER: Starts transparent on hero, turns Pure White with border ONLY when scrolled */}
+      <header 
+        className={`sticky top-0 left-0 right-0 z-30 px-4 pt-10 pb-3 flex items-center justify-between transition-all duration-300 ${
+          isScrolled 
+            ? 'bg-white shadow-xs border-b border-slate-100' 
+            : 'bg-transparent border-b border-transparent'
+        }`}
+      >
+        <div 
+          onClick={onOpenLocation}
+          className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0 mr-2"
+        >
+          <div 
+            className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+              isScrolled 
+                ? 'bg-sky-50 border border-sky-100 text-[#0284C7]' 
+                : 'bg-white/20 backdrop-blur-md border border-white/20 text-sky-300'
+            }`}
+          >
+            <MapPin className="w-4 h-4" />
+          </div>
+          
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 leading-none mb-0.5">
+              <span className="text-[9.5px] font-black text-white bg-[#0284C7] px-2 py-0.5 rounded-full shadow-xs uppercase tracking-tight flex-shrink-0">
+                10-15 MINS
+              </span>
+              <span 
+                className={`text-[11px] font-bold truncate transition-colors ${
+                  isScrolled ? 'text-slate-500' : 'text-white/90'
+                }`}
+              >
+                California
+              </span>
+            </div>
+            
+            <div 
+              className={`flex items-center gap-1 text-[13.5px] font-black leading-tight transition-colors ${
+                isScrolled ? 'text-[#0F172A]' : 'text-white drop-shadow-sm'
+              }`}
+            >
+              <span className="truncate">{selectedLocation}</span>
+              <span className={`text-[10px] flex-shrink-0 ${isScrolled ? 'text-[#0284C7]' : 'text-sky-300'}`}>▾</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <button 
+            onClick={onOpenCategories}
+            className={`w-8.5 h-8.5 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+              isScrolled 
+                ? 'bg-slate-50 border-slate-200/70 text-slate-700 hover:bg-slate-100' 
+                : 'bg-white/20 backdrop-blur-md border-white/10 text-white hover:bg-white/30'
+            }`}
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={onOpenNotifications}
+            title="Open Notifications"
+            className={`w-8.5 h-8.5 rounded-full flex items-center justify-center transition-all relative cursor-pointer border ${
+              isScrolled 
+                ? 'bg-slate-50 border-slate-200/70 text-slate-700 hover:bg-slate-100' 
+                : 'bg-white/20 backdrop-blur-md border-white/10 text-white hover:bg-white/30'
+            }`}
+          >
+            <Bell className="w-4 h-4" />
+            <span className="w-2 h-2 rounded-full bg-[#0284C7] absolute top-1.5 right-1.5 ring-1.5 ring-white"></span>
+          </button>
+          <button 
+            onClick={onOpenAccount}
+            title="Open Account Profile"
+            className="w-8.5 h-8.5 rounded-full bg-[#0284C7] hover:bg-[#0369A1] active:scale-95 transition-all flex items-center justify-center text-white font-black text-xs shadow-xs border border-white/80 cursor-pointer select-none"
+          >
+            {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'FC'}
+          </button>
+        </div>
+      </header>
+
+      {/* 1. HERO CAROUSEL BANNER (Full bleed under transparent header, pull up by header height) */}
+      <div className="-mt-[105px] relative w-full h-[360px] rounded-b-[36px] overflow-hidden shadow-xs flex-shrink-0">
         {/* Animated Carousel Image with smooth crossfade */}
         <AnimatePresence mode="wait">
           <motion.img
@@ -151,51 +255,7 @@ export default function HomeScreen({
             className="w-full h-full object-cover absolute inset-0"
           />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/85"></div>
-
-        {/* Top Navbar Header inside Hero */}
-        <div className="absolute top-12 left-0 right-0 px-4 flex items-center justify-between z-20">
-          <div 
-            onClick={onOpenLocation}
-            className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 mr-2"
-          >
-            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20 text-white flex-shrink-0">
-              <MapPin className="w-5 h-5 text-sky-300" />
-            </div>
-            
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 leading-none mb-1">
-                <span className="text-[10px] font-black text-white bg-[#0284C7] px-2 py-0.5 rounded-full shadow-xs uppercase tracking-tight flex-shrink-0">
-                  10-15 MINS
-                </span>
-                <span className="text-xs text-white/90 font-bold truncate">
-                  California
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-1 text-sm font-black text-white drop-shadow-sm leading-none">
-                <span className="truncate">{selectedLocation}</span>
-                <span className="text-[10px] text-sky-300 flex-shrink-0">▾</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button 
-              onClick={onOpenCategories}
-              className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors cursor-pointer border border-white/10"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-            <button className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors relative cursor-pointer border border-white/10">
-              <Bell className="w-4 h-4" />
-              <span className="w-2 h-2 rounded-full bg-[#0284C7] absolute top-2 right-2 ring-1.5 ring-black"></span>
-            </button>
-            <div className="w-9 h-9 rounded-full bg-[#0284C7] flex items-center justify-center text-white font-black text-xs shadow-md border border-white/30 cursor-pointer">
-              FC
-            </div>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/60"></div>
 
         {/* Hero Title & CTA (Ultra clean, minimal text, matching Kaamzo) */}
         <div className="absolute bottom-6 left-5 right-5 z-20">
@@ -249,7 +309,9 @@ export default function HomeScreen({
       <div className="px-5 mt-6 mb-3 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="text-sm">🚰</span>
+            <div className="w-5 h-5 rounded-md bg-sky-100 flex items-center justify-center text-[#0284C7]">
+              <Droplets className="w-3.5 h-3.5" />
+            </div>
             <h3 className="text-sm font-bold text-[#0F172A]">Filtercon Water Solutions</h3>
           </div>
           <p className="text-[10px] text-[#64748B]">Certified chemical & salt-free whole house systems</p>
@@ -262,46 +324,113 @@ export default function HomeScreen({
 
       {/* 3-Column Product Cards */}
       <div className="px-5 grid grid-cols-3 gap-2.5 mb-6">
-        {PRODUCTS.slice(0, 6).map((item) => (
-          <div
-            key={item.id}
-            onClick={() => onSelectProduct(item.id)}
-            className="bg-white rounded-2xl border border-slate-100 p-2 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
-          >
-            <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 mb-1.5">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => {
-                  e.target.src = 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=600&q=80';
-                }}
-              />
-              <span className="absolute top-1 right-1 bg-black/60 backdrop-blur-xs text-white px-1 py-0.2 rounded text-[8px] font-bold flex items-center gap-0.5">
-                <Star className="w-2 h-2 fill-amber-400 text-amber-400" />
-                {item.rating}
-              </span>
-            </div>
+        {PRODUCTS.slice(0, 6).map((item) => {
+          const cartItem = cartItems.find((it) => it.id === item.id);
+          const quantity = cartItem?.quantity || 0;
+          const isAdded = quantity > 0;
 
-            <div className="mb-1">
-              <h4 className="text-[11px] font-bold text-[#0F172A] line-clamp-1 leading-tight group-hover:text-[#0284C7] transition-colors">
-                {item.name}
-              </h4>
-              <p className="text-[9px] text-[#64748B] line-clamp-1">
-                {item.tagline}
-              </p>
-            </div>
+          return (
+            <div
+              key={item.id}
+              onClick={() => onSelectProduct(item.id)}
+              className={`bg-white rounded-2xl p-2 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer relative ${
+                isAdded 
+                  ? 'border-2 border-[#0284C7] shadow-[0_4px_16px_rgba(2,132,199,0.14)]' 
+                  : 'border border-slate-100'
+              }`}
+            >
+              <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-100 mb-1.5">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=600&q=80';
+                  }}
+                />
+                <span className="absolute top-1 right-1 bg-black/60 backdrop-blur-xs text-white px-1 py-0.2 rounded text-[8px] font-bold flex items-center gap-0.5">
+                  <Star className="w-2 h-2 fill-amber-400 text-amber-400" />
+                  {item.rating}
+                </span>
 
-            <div className="flex items-center justify-between pt-1 border-t border-slate-50">
-              <span className="text-[9px] font-bold text-[#0284C7] uppercase tracking-tight">
-                {item.badge}
-              </span>
-              <div className="w-6 h-6 rounded-full bg-[#0284C7] hover:bg-[#0369A1] active:scale-90 text-white flex items-center justify-center shadow-xs cursor-pointer transition-transform">
-                <ChevronRight className="w-3.5 h-3.5" />
+                {isAdded && (
+                  <span className="absolute top-1 left-1 bg-[#0284C7] text-white px-1.5 py-0.2 rounded text-[7.5px] font-black uppercase tracking-tight shadow-xs">
+                    Added
+                  </span>
+                )}
+              </div>
+
+              <div className="mb-1">
+                <h4 className={`text-[11px] font-bold line-clamp-1 leading-tight transition-colors ${
+                  isAdded ? 'text-[#0284C7]' : 'text-[#0F172A] group-hover:text-[#0284C7]'
+                }`}>
+                  {item.name}
+                </h4>
+                <p className="text-[9px] text-[#64748B] line-clamp-1">
+                  {item.tagline}
+                </p>
+              </div>
+
+              {/* Price & Quantity Controls (+ / -) cleanly separated */}
+              <div className="pt-2 border-t border-slate-100/90 flex flex-col gap-1.5">
+                <div className="flex items-baseline justify-between leading-none">
+                  <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-tight">Est. Price</span>
+                  <span className="text-xs font-black text-[#0F172A]">
+                    ${item.price}
+                  </span>
+                </div>
+
+                {isAdded ? (
+                  /* Counter with Minus and Plus (Full width clean stepper) */
+                  <div className="w-full flex items-center justify-between bg-sky-50 border border-sky-200 rounded-xl py-1 px-1.5 shadow-2xs">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onUpdateQty) {
+                          onUpdateQty(item.id, quantity - 1);
+                        }
+                      }}
+                      title="Decrease quantity"
+                      className="w-5 h-5 rounded-lg bg-white hover:bg-slate-50 text-[#0284C7] flex items-center justify-center shadow-2xs active:scale-90 transition-all cursor-pointer border border-sky-100"
+                    >
+                      <Minus className="w-2.5 h-2.5 stroke-[2.5]" />
+                    </button>
+                    <span className="text-[11px] font-black text-[#0284C7] px-1 text-center">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onUpdateQty) {
+                          onUpdateQty(item.id, quantity + 1);
+                        } else {
+                          onAddToCart(item);
+                        }
+                      }}
+                      title="Increase quantity"
+                      className="w-5 h-5 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white flex items-center justify-center shadow-2xs active:scale-90 transition-all cursor-pointer"
+                    >
+                      <Plus className="w-2.5 h-2.5 stroke-[2.5]" />
+                    </button>
+                  </div>
+                ) : (
+                  /* Single Clean Add Button */
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddToCart(item);
+                    }}
+                    title="Book / Add to selection"
+                    className="w-full py-1.5 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] active:scale-95 text-white flex items-center justify-center gap-1 shadow-2xs cursor-pointer transition-all text-[10px] font-bold"
+                  >
+                    <Plus className="w-3 h-3 stroke-[2.5]" />
+                    <span>Add</span>
+                  </button>
+                )}
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 3. WHOLE HOUSE SYSTEMS INSTALLED AROUND SAN DIEGO HOMES (Minimalist Title) */}
@@ -416,49 +545,54 @@ export default function HomeScreen({
           </div>
 
           <div className="space-y-2.5">
-            {familyBenefits.map((item, idx) => (
-              <div key={idx} className="flex items-start gap-2.5 bg-white p-2.5 rounded-2xl border border-sky-100 shadow-xs">
-                <span className="text-lg flex-shrink-0">{item.emoji}</span>
-                <div>
-                  <h4 className="text-xs font-bold text-[#0F172A]">{item.title}</h4>
-                  <p className="text-[10px] text-[#64748B] leading-snug mt-0.5">{item.desc}</p>
+            {familyBenefits.map((item, idx) => {
+              const BenefitIcon = item.icon;
+              return (
+                <div key={idx} className="flex items-start gap-2.5 bg-white p-2.5 rounded-2xl border border-sky-100 shadow-xs">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${item.iconColor}`}>
+                    <BenefitIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#0F172A]">{item.title}</h4>
+                    <p className="text-[10px] text-[#64748B] leading-snug mt-0.5">{item.desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* 5. UNIFIED CLEAN IN-HOME TEST & QUIZ SECTION (Modern, Single Card Layout) */}
+      {/* 5. UNIFIED CLEAN IN-HOME TEST & QUIZ SECTION (Pure Light Filtercon Theme) */}
       <div className="px-5 mb-4">
-        <div className="p-4 rounded-3xl bg-gradient-to-br from-[#0F172A] to-slate-900 text-white shadow-sm border border-slate-800">
+        <div className="p-4 rounded-3xl bg-white text-[#0F172A] shadow-sm border border-sky-100">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-sky-400 bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-800">
+            <span className="text-[10px] font-bold text-[#0284C7] bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
               FREE HOME CONSULTATION
             </span>
-            <span className="text-[10px] text-slate-400">Zero Charge</span>
+            <span className="text-[10px] text-emerald-600 font-bold">100% Free</span>
           </div>
 
-          <h3 className="text-sm font-black text-white leading-tight mb-1">
+          <h3 className="text-sm font-black text-[#0F172A] leading-tight mb-1">
             Test Your Water Hardness & Chlorine
           </h3>
-          <p className="text-[11px] text-slate-300 mb-3.5 leading-snug">
+          <p className="text-[11px] text-slate-500 mb-3.5 leading-snug">
             A Filtercon technician will evaluate your plumbing and tap water hardness on-site.
           </p>
 
           <div className="flex items-center gap-2">
             <a
               href="tel:8002445999"
-              className="flex-1 py-2.5 px-3 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-sky-950/40 transition-all"
+              className="flex-1 py-2.5 px-3 rounded-2xl bg-[#0284C7] hover:bg-[#0369A1] active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-sky-900/10 transition-all"
             >
               <Phone className="w-3.5 h-3.5" />
               <span>Call (800) 244-5999</span>
             </a>
             <button
               onClick={onOpenDiagnostic}
-              className="py-2.5 px-3.5 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer border border-white/10"
+              className="py-2.5 px-3.5 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-95 text-[#0284C7] font-bold text-xs flex items-center gap-1 transition-all cursor-pointer border border-sky-200"
             >
-              <Sparkles className="w-3.5 h-3.5 text-sky-300" />
+              <Sparkles className="w-3.5 h-3.5 text-[#0284C7]" />
               <span>Quiz</span>
             </button>
           </div>

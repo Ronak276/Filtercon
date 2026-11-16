@@ -11,7 +11,11 @@ export default function SplashScreen({ onFinish }) {
   }, [onFinish]);
 
   return (
-    <div className="absolute inset-0 z-50 bg-white text-[#0F172A] flex flex-col items-center justify-between p-8 overflow-hidden select-none font-sans">
+    <motion.div 
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, y: -40, transition: { duration: 0.45, ease: 'easeInOut' } }}
+      className="absolute inset-0 z-50 bg-white text-[#0F172A] flex flex-col items-center justify-between p-8 overflow-hidden select-none font-sans"
+    >
       {/* Soft Ambient Light Glows on Pure White Canvas */}
       <div className="absolute -top-32 -left-32 w-80 h-80 rounded-full bg-sky-100/60 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-cyan-100/50 blur-3xl pointer-events-none" />
@@ -79,6 +83,6 @@ export default function SplashScreen({ onFinish }) {
         </div>
         <p className="text-[10px] text-[#64748B] font-bold">Initializing Southern CA service...</p>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

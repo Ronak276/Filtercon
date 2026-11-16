@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, CheckCircle2, ArrowRight, ShieldCheck, 
-  HelpCircle, Droplet, Calendar, Phone, Award
+  HelpCircle, Droplet, Calendar, Phone, Award, ChevronLeft
 } from 'lucide-react';
 import { WATER_TEST_QUESTIONS } from '../data/products';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 
-export default function DiagnosticScreen({ onSelectProduct }) {
+export default function DiagnosticScreen({ onSelectProduct, onBack }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isCompleted, setIsCompleted] = useState(false);
@@ -36,16 +36,26 @@ export default function DiagnosticScreen({ onSelectProduct }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-16">
-      {/* Top Banner with Safe Top Padding */}
+    <div className="flex-1 flex flex-col bg-[#F8FAFC] pb-6 overflow-y-auto no-scrollbar">
+      {/* Top Banner with Safe Top Padding & Back Button */}
       <div className="px-5 pt-12 pb-3 bg-white border-b border-slate-100 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-extrabold text-[#0F172A]">Water Diagnostics</h2>
-          <p className="text-[11px] text-[#64748B]">Filtercon Smart Advisor</p>
+        <div className="flex items-center gap-2.5">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200/60 flex items-center justify-center text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
+          <div>
+            <h2 className="text-base font-extrabold text-[#0F172A] leading-tight">Water Diagnostics</h2>
+            <p className="text-[10px] text-[#64748B]">Filtercon Smart Advisor</p>
+          </div>
         </div>
         <button
           onClick={resetQuiz}
-          className="text-xs text-[#0284C7] font-semibold hover:underline cursor-pointer"
+          className="text-xs text-[#0284C7] font-bold hover:underline cursor-pointer"
         >
           Restart
         </button>
@@ -100,40 +110,41 @@ export default function DiagnosticScreen({ onSelectProduct }) {
               ))}
             </div>
           </div>
-
-          <div className="pt-6 text-center">
-            <p className="text-[11px] text-[#64748B] flex items-center justify-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#16A34A]" />
-              Over 30 years of Southern California water treatment expertise
-            </p>
-          </div>
         </div>
       ) : (
-        /* Diagnostic Result & Recommendation */
+        /* Diagnostic Result & Recommendation (Pure Filtercon Light Clean Theme) */
         <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-4">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-3xl bg-gradient-to-br from-[#0284C7] via-[#0369A1] to-[#0F172A] text-white shadow-xl"
+            className="p-5 rounded-3xl bg-white border-2 border-sky-100 shadow-[0_10px_30px_rgba(2,132,199,0.08)] text-[#0F172A]"
           >
-            <div className="flex items-center gap-2 text-sky-200 text-xs font-bold uppercase tracking-wider mb-2">
-              <Award className="w-4 h-4 text-sky-300" />
-              Prescribed Filtration System
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[10px] font-extrabold text-[#0284C7] bg-sky-50 px-2.5 py-1 rounded-full border border-sky-100 uppercase tracking-wider flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5" />
+                Prescribed Filtration System
+              </span>
+              <span className="text-[11px] font-bold text-[#16A34A] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                Best Match
+              </span>
             </div>
-            <h3 className="text-xl font-black mb-1">Filtercon 5-Stage Hybrid Duo</h3>
-            <p className="text-xs text-sky-100/90 mb-4 leading-relaxed">
-              Based on your water hardness profile, this patented system eliminates 99% chlorine, prevents scale buildup, and preserves essential minerals without salt.
+
+            <h3 className="text-lg font-black text-[#0F172A] mb-1 leading-tight">
+              Filtercon 5-Stage Hybrid Duo
+            </h3>
+            <p className="text-xs text-slate-600 mb-4 leading-relaxed font-normal">
+              Based on your water profile, this patented system eliminates 99% chlorine, prevents scale buildup, and preserves essential minerals without salt.
             </p>
-            <div className="flex items-center justify-between border-t border-sky-400/30 pt-3 text-xs">
+
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3.5">
               <div>
-                <span className="text-[10px] text-sky-200 block">Recommended System</span>
-                <span className="text-lg font-black text-white">$2,999</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Estimated System</span>
+                <span className="text-xl font-black text-[#0284C7]">$2,999</span>
               </div>
               <Button
-                variant="secondary"
                 size="sm"
                 onClick={() => onSelectProduct('fc-hybrid-combo')}
-                className="bg-white text-[#0284C7] hover:bg-sky-50 font-bold"
+                className="bg-[#0284C7] hover:bg-[#0369A1] text-white font-bold rounded-xl px-4 py-2 shadow-sm"
               >
                 View System Specs
               </Button>
