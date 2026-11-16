@@ -69,12 +69,6 @@ export default function PaymentScreen({
 
       setTimeout(() => {
         setPaymentState('success');
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.55 },
-          colors: ['#0284C7', '#38BDF8', '#16A34A', '#F59E0B']
-        });
 
         setTimeout(() => {
           if (onPaymentSuccess) {

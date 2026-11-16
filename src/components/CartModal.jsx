@@ -29,11 +29,6 @@ export default function CartModal({
     setTimeout(() => {
       setIsProcessing(false);
       setShowCheckoutSuccess(true);
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
       onClear();
     }, 1200);
   };
