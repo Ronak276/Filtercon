@@ -158,7 +158,7 @@ export default function HomeScreen({
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 32, stiffness: 140, mass: 1.1 }}
       onScroll={handleScroll}
-      className="flex-1 flex flex-col bg-white pb-6 overflow-y-auto no-scrollbar font-sans relative"
+      className="flex-1 flex flex-col bg-white pb-28 overflow-y-auto no-scrollbar font-sans relative"
     >
       {/* REAL APP TOP HEADER: Starts transparent on hero, turns Pure White with border ONLY when scrolled */}
       <header 

@@ -217,7 +217,7 @@ export default function App() {
 
           {/* Real App Booking Bottom Dock: Floating Modern Rounded Tab Bar Dock */}
           {activeTab !== 'diagnostic' && activeTab !== 'notifications' && activeTab !== 'schedule' && activeTab !== 'payment' && activeTab !== 'bookings' && (
-            <div className="flex-shrink-0 z-30 px-3.5 pb-4 pt-1 pointer-events-none">
+            <div className="flex-shrink-0 z-30 px-4 pb-3 pt-1 pointer-events-none">
               <AnimatePresence>
                 {cartItems.length > 0 && activeTab !== 'cart' && (
                   <div className="pointer-events-auto mb-2">
@@ -230,7 +230,7 @@ export default function App() {
               </AnimatePresence>
 
               {/* Floating Modern Rounded Bottom Navigation Bar */}
-              <div className="pointer-events-auto">
+              <div className="pointer-events-auto w-full max-w-[390px] mx-auto">
                 <BottomNav
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
